@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOD-ELITE Admin — Ajouter des cours</title>
+  <style>
+    :root {
+      --teal: #0E3A38;
+      --orange: #FF5A2C;
+      --cream: #F7F3EC;
+      --ink: #15130F;
+      --green: #2E8B57;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--cream); color: var(--ink); line-height: 1.6; }
+    
+    .navbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 40px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .logo { font-weight: 900; font-size: 1.3rem; }
+    .logout { background: var(--orange); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    
+    .container { max-width: 900px; margin: 40px auto; padding: 20px; }
+    .section { background: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    
+    .section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; color: var(--teal); }
+    
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #E3DCCF;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+    
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255, 90, 44, 0.1);
+    }
+    
+    .help-text { font-size: 0.85rem; color: #666; margin-top: 4px; }
+    
+    .upload-area {
+      border: 2px dashed var(--green);
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      background: #F0F8F6;
+    }
+    
+    .upload-area:hover { background: #E8F5F2; }
+    .upload-area.dragover { background: #DFF5E9; border-color: var(--orange); }
+    
+    .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .upload-text { font-weight: 600; margin-bottom: 4px; }
+    .upload-subtext { font-size: 0.9rem; color: #666; }
+    
+    .file-input { display: none; }
+    .file-info { font-size: 0.85rem; color: var(--green); margin-top: 8px; font-weight: 600; }
+    
+    .btn { 
+      background: var(--orange); 
+      color: white; 
+      border: none; 
+      padding: 12px 24px; 
+      border-radius: 8px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      font-size: 0.95rem;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #E24A1A; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    
+    .alert {
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    
+    .alert-success { background: #DFF5E9; color: #1a5c36; border-left: 4px solid var(--green); }
+    .alert-error { background: #FADBD8; color: #78281F; border-left: 4px solid #E74C3C; }
+    .alert-info { background: #D6EAF8; color: #1A3A5C; border-left: 4px solid var(--blue); }
+    
+    .courses-list { margin-top: 20px; }
+    .course-card {
+      background: #F7F3EC;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 1fr 100px;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .course-info h4 { margin-bottom: 4px; }
+    .course-meta { font-size: 0.85rem; color: #666; }
+    
+    .delete-btn { background: #E74C3C; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+    .delete-btn:hover { background: #C0392B; }
+    
+    .loading { display: none; text-align: center; padding: 20px; }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--orange);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    @media (max-width: 768px) {
+      .navbar { flex-direction: column; gap: 12px; }
+      .container { padding: 12px; }
+      .course-card { grid-template-columns: 1fr; }
+    }
+  </style>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyANVZLJfBiUsDdOXagwFHqzC0rUXMk69I0",
+      authDomain: "mod-elite.firebaseapp.com",
+      projectId: "mod-elite",
+      storageBucket: "mod-elite.firebasestorage.app",
+      messagingSenderId: "730063552834",
+      appId: "1:730063552834:web:c15660c39bebb88f40c8db"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    const auth = firebase.auth();
+  </script>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="logo">◆ MOD-ELITE Admin</div>
+  <button class="logout" onclick="logout()">Déconnexion</button>
+</div>
+
+<div class="container">
+  <!-- AJOUT COURS -->
+  <div class="section">
+    <h2 class="section-title">➕ Publier un nouveau cours</h2>
+    
+    <div id="message"></div>
+    
+    <form onsubmit="publishCourse(event)" id="course-form">
+      <div class="form-group">
+        <label>📚 Matière *</label>
+        <select id="matiere" required>
+          <option value="">-- Sélectionne --</option>
+          <option value="maths">Maths</option>
+          <option value="physique">Physique</option>
+          <option value="francais">Français</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>📖 Titre du cours *</label>
+        <input type="text" id="titre" placeholder="Ex: Les équations du second degré" required>
+      </div>
+      
+      <div class="form-group">
+        <label>📄 Chapitre</label>
+        <input type="text" id="chapitre" placeholder="Ex: Chapitre 3 - Équations">
+      </div>
+      
+      <div class="form-group">
+        <label>✍️ Résumé (ce que l'élève va apprendre) *</label>
+        <input type="text" id="resume" placeholder="Une ligne courte et claire" required>
+      </div>
+      
+      <hr style="margin: 24px 0; border: none; border-top: 1px solid #E3DCCF;">
+      
+      <h3 style="font-size: 1.1rem; margin-bottom: 16px; color: var(--teal);">📺 Vidéo YouTube (optionnel)</h3>
+      
+      <div class="form-group">
+        <label>🎥 Lien YouTube ou ID vidéo</label>
+        <input type="text" id="videoId" placeholder="Ex: https://youtube.com/watch?v=dQw4w9WgXcQ ou dQw4w9WgXcQ">
+        <div class="help-text">Copie le lien de ta vidéo YouTube. Le site extraira l'ID automatiquement.</div>
+      </div>
+      
+      <hr style="margin: 24px 0; border: none; border-top: 1px solid #E3DCCF;">
+      
+      <h3 style="font-size: 1.1rem; margin-bottom: 16px; color: var(--teal);">📄 Fichier PDF du cours (optionnel)</h3>
+      
+      <div class="form-group">
+        <label>Glisse ou clique pour uploader le PDF</label>
+        <div class="upload-area" id="upload-area" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" onclick="document.getElementById('pdf-input').click()">
+          <div class="upload-icon">📄</div>
+          <div class="upload-text">Clique ou glisse ton PDF ici</div>
+          <div class="upload-subtext">Max 20 MB • Format PDF uniquement</div>
+        </div>
+        <input type="file" id="pdf-input" class="file-input" accept=".pdf" onchange="handleFileSelect(event)">
+        <div id="file-name" class="file-info"></div>
+      </div>
+      
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p style="margin-top: 12px;">Publication en cours...</p>
+      </div>
+      
+      <button type="submit" class="btn" id="submit-btn">🚀 Publier le cours</button>
+    </form>
+  </div>
+  
+  <!-- LISTE COURS -->
+  <div class="section">
+    <h2 class="section-title">📚 Tous les cours publiés</h2>
+    <div id="stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+      <div style="background: #F0F8F6; padding: 12px; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.6rem; font-weight: 700; color: var(--teal);" id="total-courses">0</div>
+        <div style="font-size: 0.85rem; color: #666;">Cours total</div>
+      </div>
+      <div style="background: #FFF9F5; padding: 12px; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.6rem; font-weight: 700; color: var(--orange);" id="total-videos">0</div>
+        <div style="font-size: 0.85rem; color: #666;">Avec vidéo</div>
+      </div>
+      <div style="background: #F5F5F5; padding: 12px; border-radius: 8px; text-align: center;">
+        <div style="font-size: 1.6rem; font-weight: 700; color: var(--green);" id="total-pdfs">0</div>
+        <div style="font-size: 0.85rem; color: #666;">Avec PDF</div>
+      </div>
+    </div>
+    <div id="courses-container" class="courses-list"></div>
+  </div>
+</div>
+
+<script>
+let selectedFile = null;
+let COURSES = [];
+
+// Auth
+auth.onAuthStateChanged(user => {
+  if (!user) {
+    showAlert('Vous devez être connecté. Redirection...', 'error');
+    setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+  } else {
+    loadCourses();
+  }
+});
+
+// Upload drag & drop
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('upload-area').classList.add('dragover');
+}
+
+function handleDragLeave() {
+  document.getElementById('upload-area').classList.remove('dragover');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-area').classList.remove('dragover');
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    handleFileSelect({target: {files}});
+  }
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file && file.type === 'application/pdf') {
+    selectedFile = file;
+    const sizeInMB = (file.size / 1024 / 1024).toFixed(2);
+    document.getElementById('file-name').textContent = `✓ ${file.name} (${sizeInMB} MB)`;
+  } else if (file) {
+    showAlert('Seulement les fichiers PDF sont acceptés', 'error');
+  }
+}
+
+// Extraire l'ID YouTube
+function extractYouTubeId(url) {
+  if (!url) return null;
+  const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[7].length == 11) ? match[7] : url;
+}
+
+async function publishCourse(e) {
+  e.preventDefault();
+  
+  const matiere = document.getElementById('matiere').value;
+  const titre = document.getElementById('titre').value;
+  const chapitre = document.getElementById('chapitre').value;
+  const resume = document.getElementById('resume').value;
+  const videoInput = document.getElementById('videoId').value;
+  const videoId = extractYouTubeId(videoInput);
+  
+  if (!matiere || !titre || !resume) {
+    showAlert('Remplis au minimum : Matière, Titre, Résumé', 'error');
+    return;
+  }
+  
+  // Vérifier qu'il y a au moins un PDF ou une vidéo
+  if (!selectedFile && !videoId) {
+    showAlert('Ajoute au moins une vidéo YouTube OU un PDF', 'error');
+    return;
+  }
+  
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('submit-btn').disabled = true;
+  
+  try {
+    let pdfUrl = null;
+    
+    // Upload PDF si sélectionné
+    if (selectedFile) {
+      const ref = storage.ref('cours/' + Date.now() + '_' + selectedFile.name);
+      await ref.put(selectedFile);
+      pdfUrl = await ref.getDownloadURL();
+    }
+    
+    // Ajouter dans Firestore
+    const courseData = {
+      matiere: matiere.toLowerCase(),
+      titre,
+      chapitre: chapitre || '',
+      resume,
+      videoId: videoId || null,
+      pdfUrl: pdfUrl || null,
+      cree: new Date(),
+      updatedAt: new Date()
+    };
+    
+    await db.collection('cours').add(courseData);
+    
+    showAlert('✅ Cours publié avec succès! Les élèves peuvent le voir maintenant.', 'success');
+    document.getElementById('course-form').reset();
+    selectedFile = null;
+    document.getElementById('file-name').textContent = '';
+    loadCourses();
+  } catch(e) {
+    console.error(e);
+    showAlert('❌ Erreur: ' + e.message, 'error');
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('submit-btn').disabled = false;
+  }
+}
+
+async function loadCourses() {
+  try {
+    const snap = await db.collection('cours').orderBy('cree', 'desc').get();
+    COURSES = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    renderCourses();
+    updateStats();
+  } catch(e) {
+    console.log('Erreur chargement:', e);
+  }
+}
+
+function updateStats() {
+  const withVideo = COURSES.filter(c => c.videoId).length;
+  const withPdf = COURSES.filter(c => c.pdfUrl).length;
+  document.getElementById('total-courses').textContent = COURSES.length;
+  document.getElementById('total-videos').textContent = withVideo;
+  document.getElementById('total-pdfs').textContent = withPdf;
+}
+
+function renderCourses() {
+  let html = '';
+  if (COURSES.length === 0) {
+    html = '<p style="text-align:center;color:#999;padding:20px">Pas encore de cours publié 📚</p>';
+  } else {
+    html = COURSES.map(c => {
+      const icon = c.matiere === 'maths' ? '🔢' : c.matiere === 'physique' ? '⚛️' : '📖';
+      const hasVideo = c.videoId ? '🎥' : '';
+      const hasPdf = c.pdfUrl ? '📄' : '';
+      return `
+        <div class="course-card">
+          <div class="course-info">
+            <h4>${icon} ${c.titre}</h4>
+            <div class="course-meta">
+              ${c.chapitre} • ${c.matiere.toUpperCase()} ${hasVideo} ${hasPdf}
+            </div>
+            <div style="font-size: 0.8rem; color: #999; margin-top: 4px;">
+              ${c.resume}
+            </div>
+          </div>
+          <button class="delete-btn" onclick="deleteCourse('${c.id}')">Supprimer</button>
+        </div>
+      `;
+    }).join('');
+  }
+  document.getElementById('courses-container').innerHTML = html;
+}
+
+async function deleteCourse(id) {
+  if (!confirm('Sûr? Cette action ne peut pas être annulée.')) return;
+  try {
+    await db.collection('cours').doc(id).delete();
+    showAlert('✓ Cours supprimé', 'success');
+    loadCourses();
+  } catch(e) {
+    showAlert('❌ Erreur: ' + e.message, 'error');
+  }
+}
+
+function showAlert(msg, type) {
+  const el = document.getElementById('message');
+  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  if (type === 'success') {
+    setTimeout(() => { el.innerHTML = ''; }, 5000);
+  }
+}
+
+function logout() {
+  auth.signOut().then(() => {
+    window.location.href = 'index.html';
+  });
+}
+</script>
+
+</body>
+</html>
