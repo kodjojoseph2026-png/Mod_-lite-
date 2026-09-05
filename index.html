@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOD-ELITE — Réussis en Maths, Physique & Français</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    :root {
+      --teal: #0E3A38;
+      --orange: #FF5A2C;
+      --cream: #F7F3EC;
+      --ink: #15130F;
+      --green: #2E8B57;
+      --blue: #2B6CB0;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--cream); color: var(--ink); line-height: 1.6; }
+    
+    @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+    
+    /* ===== NAVBAR ===== */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 40px;
+      background: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .logo { font-weight: 900; font-size: 1.3rem; display: flex; align-items: center; gap: 8px; }
+    .logo-diamond { width: 16px; height: 16px; background: var(--orange); transform: rotate(45deg); border-radius: 3px; }
+    
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a { text-decoration: none; color: var(--ink); font-weight: 600; font-size: 0.95rem; transition: color 0.2s; cursor: pointer; }
+    .nav-links a:hover { color: var(--orange); }
+    
+    .user-info { display: none; font-size: 0.9rem; color: #666; }
+    .logout-btn { background: var(--orange); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    
+    /* ===== HERO ===== */
+    .hero {
+      background: linear-gradient(135deg, var(--teal) 0%, #0A2A29 100%);
+      color: white;
+      padding: 80px 40px;
+      text-align: center;
+      animation: slideIn 0.8s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 400px;
+      height: 400px;
+      background: rgba(255, 90, 44, 0.1);
+      border-radius: 50%;
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    .hero-content { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
+    .hero h1 { font-size: 3rem; margin-bottom: 16px; line-height: 1.2; }
+    .hero p { font-size: 1.2rem; margin-bottom: 32px; opacity: 0.95; }
+    
+    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary { background: var(--orange); color: white; padding: 14px 32px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 90, 44, 0.3); }
+    .btn-secondary { background: white; color: var(--teal); padding: 14px 32px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1rem; }
+    
+    /* ===== STATS ===== */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      padding: 40px;
+      max-width: 1000px;
+      margin: -40px auto 60px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      animation: slideIn 0.8s ease-out;
+    }
+    
+    .stat-number { font-size: 2.4rem; font-weight: 900; color: var(--orange); }
+    .stat-label { font-size: 0.9rem; color: #999; margin-top: 8px; }
+    
+    /* ===== FEATURES ===== */
+    .features {
+      padding: 60px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .section-title { font-size: 2.2rem; text-align: center; margin-bottom: 50px; font-weight: 700; }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+    }
+    
+    .feature-card {
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+      border: 1px solid #E3DCCF;
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+      animation: slideIn 0.8s ease-out;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    }
+    
+    .feature-icon { font-size: 2.4rem; margin-bottom: 16px; }
+    .feature-card h3 { font-size: 1.2rem; margin-bottom: 12px; }
+    .feature-card p { color: #666; font-size: 0.95rem; }
+    
+    /* ===== DASHBOARD ===== */
+    .dashboard { display: none; padding: 40px; max-width: 1400px; margin: 0 auto; }
+    .dashboard.active { display: block; }
+    
+    .dashboard-header { margin-bottom: 40px; }
+    .dashboard-header h2 { font-size: 1.8rem; margin-bottom: 8px; }
+    
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #E3DCCF;
+    }
+    
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 12px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+      color: #999;
+    }
+    
+    .tab-btn.active { color: var(--orange); border-bottom-color: var(--orange); }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .course-item {
+      background: white;
+      border: 1px solid #E3DCCF;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: slideIn 0.6s ease-out;
+    }
+    
+    .course-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    
+    .course-header {
+      height: 140px;
+      background: linear-gradient(135deg, var(--blue), #1E4A90);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+    }
+    
+    .course-body { padding: 16px; }
+    .course-title { font-weight: 700; margin-bottom: 6px; font-size: 1rem; }
+    .course-desc { font-size: 0.85rem; color: #666; margin-bottom: 10px; }
+    .course-badge { display: inline-block; background: var(--green); color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    
+    /* ===== MODAL ===== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .modal.open { display: flex; }
+    
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 900px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    .modal-header { padding: 20px; border-bottom: 1px solid #E3DCCF; display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 1.4rem; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 1.8rem; cursor: pointer; color: #999; }
+    
+    .modal-body { padding: 20px; }
+    
+    .content-viewer {
+      width: 100%;
+      height: 600px;
+      border: 1px solid #E3DCCF;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      background: #000;
+    }
+    
+    /* ===== PRICING ===== */
+    .pricing {
+      background: linear-gradient(135deg, var(--teal), #0A2A29);
+      color: white;
+      padding: 60px 40px;
+      text-align: center;
+    }
+    
+    .pricing-card {
+      background: white;
+      color: var(--ink);
+      padding: 40px;
+      border-radius: 14px;
+      max-width: 350px;
+      margin: 20px auto;
+      text-align: center;
+    }
+    
+    .price { font-size: 2.8rem; font-weight: 900; color: var(--orange); margin: 20px 0; }
+    .price-period { font-size: 0.95rem; color: #999; }
+    
+    .features-list { text-align: left; margin: 24px 0; }
+    .features-list li { padding: 10px 0; border-bottom: 1px solid #E3DCCF; list-style: none; }
+    .features-list li:before { content: '✓ '; color: var(--green); font-weight: 700; }
+    
+    /* ===== FOOTER ===== */
+    .footer { background: var(--ink); color: white; padding: 40px; text-align: center; }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .navbar { padding: 12px 20px; }
+      .hero { padding: 50px 20px; }
+      .hero h1 { font-size: 2rem; }
+      .features { padding: 40px 20px; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .dashboard { padding: 20px; }
+      .courses-grid { grid-template-columns: 1fr; }
+      .modal-content { max-width: 95%; }
+    }
+  </style>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyANVZLJfBiUsDdOXagwFHqzC0rUXMk69I0",
+      authDomain: "mod-elite.firebaseapp.com",
+      projectId: "mod-elite",
+      storageBucket: "mod-elite.firebasestorage.app",
+      messagingSenderId: "730063552834",
+      appId: "1:730063552834:web:c15660c39bebb88f40c8db"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+  </script>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="logo">
+    <div class="logo-diamond"></div>
+    MOD-ELITE
+  </div>
+  <div class="nav-links">
+    <a id="nav-home" onclick="showLanding()">Accueil</a>
+    <a id="nav-dashboard" style="display:none" onclick="showDashboard()">Mes cours</a>
+    <a href="admin-upload.html">Admin</a>
+    <a href="https://wa.me/2250153671434">Contact</a>
+    <button class="logout-btn" id="logout-btn" style="display:none" onclick="logout()">Déconnexion</button>
+  </div>
+</div>
+
+<!-- LANDING PAGE -->
+<div id="landing">
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Réussis en Maths, Physique & Français 🚀</h1>
+      <p>La plateforme d'apprentissage #1 pour les élèves de 3e à Tle en Côte d'Ivoire.</p>
+      <div class="cta-buttons">
+        <button class="btn-primary" onclick="showDashboard()">Voir les cours</button>
+        <a href="https://wa.me/2250153671434" class="btn-secondary" style="text-decoration:none">Nous contacter</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-number">500+</div>
+      <div class="stat-label">Élèves actifs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">50+</div>
+      <div class="stat-label">Vidéos en ligne</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">100+</div>
+      <div class="stat-label">Leçons complètes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">4.9★</div>
+      <div class="stat-label">Note moyenne</div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features">
+    <h2 class="section-title">Pourquoi MOD-ELITE ?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎬</div>
+        <h3>Vidéos en HD</h3>
+        <p>Regarde des vidéos YouTube intégrées directement sur la plateforme.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>Cours complets en PDF</h3>
+        <p>Chaque leçon expliquée pas à pas, téléchargeable.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>Accès illimité</h3>
+        <p>Sur mobile, tablette, PC. Apprends où tu veux, quand tu veux.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>3000 FCFA/mois</h3>
+        <p>Moins cher qu'un cours particulier. Accès à TOUS les cours.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="pricing" id="pricing">
+    <h2 class="section-title" style="color:white">Abonnement illimité</h2>
+    <div class="pricing-card">
+      <div style="font-size: 1.4rem; font-weight: 700; color: var(--teal);">MOD-ELITE Premium</div>
+      <div class="price">3000 FCFA</div>
+      <div class="price-period">par mois • sans engagement</div>
+      <ul class="features-list">
+        <li>Accès à tous les cours (Maths, Physique, Français)</li>
+        <li>Vidéos YouTube en HD + PDFs</li>
+        <li>Nouvelles leçons chaque semaine</li>
+        <li>Accès mobile illimité</li>
+        <li>Support WhatsApp 24/7</li>
+      </ul>
+      <a href="https://wa.me/2250153671434" style="display: inline-block; background: #25D366; color: white; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 1rem;">💬 S'abonner</a>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="dashboard">
+  <div class="dashboard-header">
+    <h2>Bienvenue sur MOD-ELITE 👋</h2>
+    <p>Retrouve tous tes cours avec vidéos et PDFs</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('maths')">🔢 Maths</button>
+    <button class="tab-btn" onclick="switchTab('physique')">⚛️ Physique</button>
+    <button class="tab-btn" onclick="switchTab('francais')">📖 Français</button>
+  </div>
+
+  <div id="maths-tab" class="tab-content active">
+    <div class="courses-grid" id="maths-list"></div>
+  </div>
+
+  <div id="physique-tab" class="tab-content">
+    <div class="courses-grid" id="physique-list"></div>
+  </div>
+
+  <div id="francais-tab" class="tab-content">
+    <div class="courses-grid" id="francais-list"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="course-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Cours</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="content-viewer" class="content-viewer"></div>
+      <div id="course-info" style="font-size: 0.9rem; color: #666;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>© 2026 MOD-ELITE — Tous droits réservés | Créé avec ❤️ pour les élèves de Côte d'Ivoire</p>
+  <p style="font-size: 0.9rem; margin-top: 12px;">WhatsApp: 01 53 67 14 34</p>
+</div>
+
+<script>
+let COURSES = [];
+let CURRENT_TAB = 'maths';
+
+async function loadCourses() {
+  try {
+    const snap = await db.collection('cours').orderBy('cree', 'desc').get();
+    COURSES = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    renderCourses();
+  } catch(e) {
+    console.log('Pas encore de cours');
+  }
+}
+
+function renderCourses() {
+  ['maths', 'physique', 'francais'].forEach(mat => {
+    const filtered = COURSES.filter(c => c.matiere === mat);
+    const html = filtered.length === 0 
+      ? '<p style="grid-column:1/-1;text-align:center;color:#999;padding:40px">Pas encore de cours 📚</p>'
+      : filtered.map(c => {
+        const type = c.videoId ? '🎥 Vidéo' : c.pdfUrl ? '📄 PDF' : '📚';
+        return `
+        <div class="course-item" onclick="openCourse('${c.id}')">
+          <div class="course-header">${mat === 'maths' ? '🔢' : mat === 'physique' ? '⚛️' : '📖'}</div>
+          <div class="course-body">
+            <div class="course-title">${c.titre || 'Sans titre'}</div>
+            <div class="course-desc">${c.resume || c.chapitre || 'Leçon'}</div>
+            <div class="course-badge">${type}</div>
+          </div>
+        </div>
+      `;
+      }).join('');
+    document.getElementById(mat + '-list').innerHTML = html;
+  });
+}
+
+function switchTab(tab) {
+  CURRENT_TAB = tab;
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(tab + '-tab').classList.add('active');
+  event.target.classList.add('active');
+}
+
+async function openCourse(courseId) {
+  const course = COURSES.find(c => c.id === courseId);
+  if (!course) return;
+  
+  document.getElementById('modal-title').textContent = course.titre || 'Cours';
+  document.getElementById('course-info').textContent = course.resume || course.chapitre || '';
+  
+  // Afficher vidéo YouTube si disponible
+  if (course.videoId) {
+    const embedUrl = `https://www.youtube.com/embed/${course.videoId}?rel=0&modestbranding=1`;
+    document.getElementById('content-viewer').innerHTML = `<iframe style="width:100%;height:100%;border:0;" src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+  }
+  // Sinon afficher PDF
+  else if (course.pdfUrl) {
+    try {
+      const pdf = await pdfjsLib.getDocument(course.pdfUrl).promise;
+      const page = await pdf.getPage(1);
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      const viewport = page.getViewport({scale: 1.5});
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({canvasContext: context, viewport: viewport}).promise;
+      document.getElementById('content-viewer').innerHTML = '';
+      document.getElementById('content-viewer').appendChild(canvas);
+    } catch(e) {
+      document.getElementById('content-viewer').innerHTML = '<p style="padding:20px;text-align:center;">Erreur chargement PDF</p>';
+    }
+  }
+  
+  document.getElementById('course-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('course-modal').classList.remove('open');
+}
+
+function showLanding() {
+  document.getElementById('landing').style.display = 'block';
+  document.getElementById('dashboard').classList.remove('active');
+}
+
+function showDashboard() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('dashboard').classList.add('active');
+  loadCourses();
+}
+
+function logout() {
+  showLanding();
+}
+
+// Charger les cours au démarrage
+loadCourses();
+</script>
+
+</body>
+</html>
