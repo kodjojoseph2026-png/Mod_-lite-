@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MOD-ELITE Admin — Ajouter des cours</title>
+  <style>
+    :root {
+      --teal: #0E3A38;
+      --orange: #FF5A2C;
+      --cream: #F7F3EC;
+      --ink: #15130F;
+      --green: #2E8B57;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; 
+      background: var(--cream); 
+      color: var(--ink); 
+      line-height: 1.6;
+    }
+    
+    /* NAVBAR */
+    .navbar { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      padding: 14px 20px;
+      background: white; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      gap: 16px;
+    }
+    .logo { font-weight: 900; font-size: 1.2rem; }
+    .navbar a { text-decoration: none; color: var(--ink); font-weight: 600; padding: 6px 12px; }
+    .navbar a:hover { background: var(--cream); border-radius: 6px; }
+    
+    /* CONTAINER */
+    .container { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 30px 20px;
+    }
+    
+    /* GRID LAYOUT */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+    
+    /* SECTION */
+    .section { 
+      background: white; 
+      padding: 30px; 
+      border-radius: 12px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .section-title { 
+      font-size: 1.3rem; 
+      font-weight: 700; 
+      margin-bottom: 20px; 
+      color: var(--teal);
+    }
+    
+    /* FORM */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { 
+      display: block; 
+      font-weight: 600; 
+      margin-bottom: 6px; 
+      font-size: 0.9rem;
+    }
+    .form-group input, 
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #E3DCCF;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+    
+    .form-group input:focus, 
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255, 90, 44, 0.1);
+    }
+    
+    .help-text { 
+      font-size: 0.8rem; 
+      color: #666; 
+      margin-top: 3px;
+    }
+    
+    hr { margin: 16px 0; border: none; border-top: 1px solid #E3DCCF; }
+    
+    /* UPLOAD */
+    .upload-area {
+      border: 2px dashed var(--green);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      background: #F0F8F6;
+    }
+    
+    .upload-area:hover { background: #E8F5F2; }
+    .upload-area.dragover { background: #DFF5E9; border-color: var(--orange); }
+    
+    .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .upload-text { font-weight: 600; margin-bottom: 4px; font-size: 0.95rem; }
+    .upload-subtext { font-size: 0.8rem; color: #666; }
+    .file-input { display: none; }
+    .file-info { font-size: 0.8rem; color: var(--green); margin-top: 6px; font-weight: 600; }
+    
+    /* BUTTON */
+    .btn { 
+      background: var(--orange); 
+      color: white; 
+      border: none; 
+      padding: 11px 20px; 
+      border-radius: 8px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      font-size: 0.9rem;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #E24A1A; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    
+    /* ALERT */
+    .alert {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    
+    .alert-success { background: #DFF5E9; color: #1a5c36; border-left: 4px solid var(--green); }
+    .alert-error { background: #FADBD8; color: #78281F; border-left: 4px solid #E74C3C; }
+    
+    /* COURSES LIST */
+    .course-card {
+      background: #F7F3EC;
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .course-info { flex: 1; }
+    .course-info h4 { margin-bottom: 2px; font-size: 0.95rem; }
+    .course-meta { font-size: 0.8rem; color: #666; }
+    
+    .delete-btn { 
+      background: #E74C3C; 
+      color: white; 
+      border: none; 
+      padding: 6px 10px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .delete-btn:hover { background: #C0392B; }
+    
+    /* LOADING */
+    .loading { display: none; text-align: center; padding: 16px; }
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--orange);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 8px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    /* STATS */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    
+    .stat-card {
+      background: #F0F8F6;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-value { font-size: 1.4rem; font-weight: 700; color: var(--teal); }
+    .stat-label { font-size: 0.8rem; color: #666; margin-top: 2px; }
+    
+    .stat-card.orange { background: #FFF9F5; }
+    .stat-card.orange .stat-value { color: var(--orange); }
+    
+    .stat-card.gray { background: #F5F5F5; }
+    .stat-card.gray .stat-value { color: #666; }
+    
+    .courses-list { margin-top: 16px; max-height: 600px; overflow-y: auto; }
+    
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+      .navbar { padding: 12px 16px; }
+      .container { padding: 20px 16px; }
+    }
+    
+    @media (max-width: 768px) {
+      .navbar { flex-direction: column; gap: 10px; }
+      .logo { font-size: 1rem; }
+      .section { padding: 20px; }
+      .section-title { font-size: 1.1rem; }
+      .form-group { margin-bottom: 12px; }
+      .stats { grid-template-columns: 1fr; }
+      .upload-area { padding: 16px; }
+      .upload-icon { font-size: 1.5rem; }
+      .course-card { flex-direction: column; align-items: flex-start; }
+      .delete-btn { width: 100%; }
+    }
+  </style>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyANVZLJfBiUsDdOXagwFHqzC0rUXMk69I0",
+      authDomain: "mod-elite.firebaseapp.com",
+      projectId: "mod-elite",
+      storageBucket: "mod-elite.firebasestorage.app",
+      messagingSenderId: "730063552834",
+      appId: "1:730063552834:web:c15660c39bebb88f40c8db"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+  </script>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="logo">◆ MOD-ELITE Admin</div>
+  <a href="index.html">← Retour au site</a>
+</div>
+
+<div class="container">
+  <div class="content-grid">
+    
+    <!-- FORMULAIRE AJOUT COURS -->
+    <div class="section">
+      <h2 class="section-title">➕ Publier un cours</h2>
+      
+      <div id="message"></div>
+      
+      <form onsubmit="publishCourse(event)" id="course-form">
+        <div class="form-group">
+          <label>📚 Matière *</label>
+          <select id="matiere" required>
+            <option value="">-- Sélectionne --</option>
+            <option value="maths">Maths</option>
+            <option value="physique">Physique</option>
+            <option value="francais">Français</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>📖 Titre du cours *</label>
+          <input type="text" id="titre" placeholder="Ex: Les équations du 2nd degré" required>
+        </div>
+        
+        <div class="form-group">
+          <label>📄 Chapitre</label>
+          <input type="text" id="chapitre" placeholder="Ex: Chapitre 3">
+        </div>
+        
+        <div class="form-group">
+          <label>✍️ Résumé *</label>
+          <input type="text" id="resume" placeholder="Une ligne courte" required>
+        </div>
+        
+        <hr>
+        
+        <h3 style="font-size: 1rem; margin-bottom: 12px; color: var(--teal);">📺 Vidéo YouTube</h3>
+        
+        <div class="form-group">
+          <label>Lien ou ID</label>
+          <input type="text" id="videoId" placeholder="https://youtube.com/watch?v=... ou ID">
+          <div class="help-text">Copie le lien ou l'ID (11 caractères)</div>
+        </div>
+        
+        <hr>
+        
+        <h3 style="font-size: 1rem; margin-bottom: 12px; color: var(--teal);">📄 Fichier PDF</h3>
+        
+        <div class="form-group">
+          <div class="upload-area" id="upload-area" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" onclick="document.getElementById('pdf-input').click()">
+            <div class="upload-icon">📄</div>
+            <div class="upload-text">Clique ou glisse le PDF</div>
+            <div class="upload-subtext">Max 20 MB</div>
+          </div>
+          <input type="file" id="pdf-input" class="file-input" accept=".pdf" onchange="handleFileSelect(event)">
+          <div id="file-name" class="file-info"></div>
+        </div>
+        
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Publication en cours...</p>
+        </div>
+        
+        <button type="submit" class="btn">🚀 Publier</button>
+      </form>
+    </div>
+    
+    <!-- LISTE COURS -->
+    <div class="section">
+      <h2 class="section-title">📚 Tous les cours</h2>
+      
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="total-courses">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-value" id="total-videos">0</div>
+          <div class="stat-label">Avec vidéo</div>
+        </div>
+        <div class="stat-card gray">
+          <div class="stat-value" id="total-pdfs">0</div>
+          <div class="stat-label">Avec PDF</div>
+        </div>
+      </div>
+      
+      <div id="courses-container" class="courses-list"></div>
+    </div>
+    
+  </div>
+</div>
+
+<script>
+let selectedFile = null;
+let COURSES = [];
+
+loadCourses();
+
+function handleDragOver(e) { 
+  e.preventDefault(); 
+  document.getElementById('upload-area').classList.add('dragover'); 
+}
+
+function handleDragLeave() { 
+  document.getElementById('upload-area').classList.remove('dragover'); 
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-area').classList.remove('dragover');
+  const files = e.dataTransfer.files;
+  if (files.length > 0) handleFileSelect({target: {files}});
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file && file.type === 'application/pdf') {
+    selectedFile = file;
+    const mb = (file.size / 1024 / 1024).toFixed(1);
+    document.getElementById('file-name').textContent = `✓ ${file.name} (${mb}MB)`;
+  } else if (file) {
+    showAlert('PDF uniquement', 'error');
+  }
+}
+
+function extractYouTubeId(url) {
+  if (!url) return null;
+  const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[7].length == 11) ? match[7] : url;
+}
+
+async function publishCourse(e) {
+  e.preventDefault();
+  
+  const matiere = document.getElementById('matiere').value;
+  const titre = document.getElementById('titre').value;
+  const chapitre = document.getElementById('chapitre').value;
+  const resume = document.getElementById('resume').value;
+  const videoId = extractYouTubeId(document.getElementById('videoId').value);
+  
+  if (!matiere || !titre || !resume) {
+    showAlert('Remplis : Matière, Titre, Résumé', 'error');
+    return;
+  }
+  
+  if (!selectedFile && !videoId) {
+    showAlert('Ajoute une vidéo OU un PDF', 'error');
+    return;
+  }
+  
+  document.getElementById('loading').style.display = 'block';
+  document.querySelector('.btn').disabled = true;
+  
+  try {
+    let pdfUrl = null;
+    if (selectedFile) {
+      const ref = storage.ref('cours/' + Date.now() + '_' + selectedFile.name);
+      await ref.put(selectedFile);
+      pdfUrl = await ref.getDownloadURL();
+    }
+    
+    await db.collection('cours').add({
+      matiere: matiere.toLowerCase(),
+      titre,
+      chapitre: chapitre || '',
+      resume,
+      videoId: videoId || null,
+      pdfUrl: pdfUrl || null,
+      cree: new Date()
+    });
+    
+    showAlert('✅ Cours publié!', 'success');
+    document.getElementById('course-form').reset();
+    selectedFile = null;
+    document.getElementById('file-name').textContent = '';
+    loadCourses();
+  } catch(e) {
+    showAlert('❌ Erreur: ' + e.message, 'error');
+  } finally {
+    document.getElementById('loading').style.display = 'none';
+    document.querySelector('.btn').disabled = false;
+  }
+}
+
+async function loadCourses() {
+  try {
+    const snap = await db.collection('cours').orderBy('cree', 'desc').get();
+    COURSES = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    
+    let html = '';
+    if (COURSES.length === 0) {
+      html = '<p style="text-align:center;color:#999;padding:20px">Pas encore de cours 📚</p>';
+    } else {
+      html = COURSES.map(c => {
+        const icon = c.matiere === 'maths' ? '🔢' : c.matiere === 'physique' ? '⚛️' : '📖';
+        const hasVideo = c.videoId ? '🎥' : '';
+        const hasPdf = c.pdfUrl ? '📄' : '';
+        return `
+          <div class="course-card">
+            <div class="course-info">
+              <h4>${icon} ${c.titre}</h4>
+              <div class="course-meta">${c.chapitre} • ${c.matiere.toUpperCase()} ${hasVideo} ${hasPdf}</div>
+            </div>
+            <button class="delete-btn" onclick="deleteCourse('${c.id}')">Supprimer</button>
+          </div>
+        `;
+      }).join('');
+    }
+    document.getElementById('courses-container').innerHTML = html;
+    updateStats();
+  } catch(e) { 
+    console.log('Erreur:', e); 
+  }
+}
+
+function updateStats() {
+  const withVideo = COURSES.filter(c => c.videoId).length;
+  const withPdf = COURSES.filter(c => c.pdfUrl).length;
+  document.getElementById('total-courses').textContent = COURSES.length;
+  document.getElementById('total-videos').textContent = withVideo;
+  document.getElementById('total-pdfs').textContent = withPdf;
+}
+
+async function deleteCourse(id) {
+  if (!confirm('Sûr? C\'est définitif.')) return;
+  try {
+    await db.collection('cours').doc(id).delete();
+    showAlert('✓ Supprimé', 'success');
+    loadCourses();
+  } catch(e) {
+    showAlert('❌ ' + e.message, 'error');
+  }
+}
+
+function showAlert(msg, type) {
+  const el = document.getElementById('message');
+  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  if (type === 'success') {
+    setTimeout(() => { el.innerHTML = ''; }, 4000);
+  }
+}
+</script>
+
+</body>
+</html>
